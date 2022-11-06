@@ -1,0 +1,11 @@
+version: '3'
+services:
+  database:
+    image: mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_USER=usuario
+      - MSQL_PASSWORD=senha
+      - MYSQL_DATABASE=loja
+    ports:
+      - 3306:3306
