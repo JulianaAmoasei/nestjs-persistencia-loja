@@ -5,6 +5,7 @@ import {
   IsUUID,
   MinLength,
 } from 'class-validator';
+import { UsuarioEntity } from '../usuario.entity';
 import { IsEmailUnique } from '../validacoes/is-email-unique.validator';
 
 export class AtualizaUsuarioDTO {
@@ -20,4 +21,11 @@ export class AtualizaUsuarioDTO {
   @MinLength(6, { message: 'A senha precisa ter mais que 6 caracteres' })
   @IsOptional()
   senha?: string;
+
+  toEntity(): UsuarioEntity {
+    const usuario = new UsuarioEntity();
+    usuario.email = this.email;
+    usuario.senha = this.senha;
+    return usuario;
+  }
 }

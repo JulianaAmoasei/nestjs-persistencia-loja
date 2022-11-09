@@ -1,11 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { UsuarioRepository } from './usuario.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UsuarioEntity } from './usuario.entity';
 
 @Injectable()
 export class UsuarioService {
-  constructor(private readonly usuarioRepository: UsuarioRepository) {}
+  constructor(
+    @InjectRepository(UsuarioEntity)
+    private readonly usuarioRepository: Repository<UsuarioEntity>,
+  ) {}
 
-  existeComId(id: string) {
-    return this.usuarioRepository.buscaPorId(id) !== null;
+  async existeComId(id: string) {
+    const usuario = await this.usuarioRepository.findOneBy({ id });
+    return usuario !== null;
   }
 }

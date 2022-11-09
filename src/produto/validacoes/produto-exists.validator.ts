@@ -4,14 +4,19 @@ import {
   NotFoundException,
   PipeTransform,
 } from '@nestjs/common';
-import { ProdutoRepository } from '../produto.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ProdutoEntity } from '../produto.entity';
 
 @Injectable()
 export class ProdutoExists implements PipeTransform {
-  constructor(private readonly produtoRepository: ProdutoRepository) {}
+  constructor(
+    @InjectRepository(ProdutoEntity)
+    private readonly produtoRepository: Repository<ProdutoEntity>,
+  ) {}
 
-  transform(id: string) {
-    const possivelProduto = this.produtoRepository.buscaPorId(id);
+  async transform(id: string) {
+    const possivelProduto = await this.produtoRepository.findOneBy({ id });
     if (!possivelProduto) {
       throw new NotFoundException({
         message: 'Produto não encontrado',

@@ -25,6 +25,6 @@ export class UsuarioEntity {
   @UpdateDateColumn()
   dataAtualizacao: Date;
 
-  @OneToMany(() => ProdutoEntity, (pu) => pu.usuario)
+  @OneToMany(() => ProdutoEntity, (pu) => pu.usuario, { cascade: ['remove'] })
   produtos: ProdutoEntity[];
 }

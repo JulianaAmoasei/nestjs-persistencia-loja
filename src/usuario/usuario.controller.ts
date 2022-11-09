@@ -1,3 +1,4 @@
+import { Repository } from 'typeorm';
 import {
   Body,
   Controller,
@@ -13,48 +14,61 @@ import {
 import { CriaUsuarioDTO } from './dto/cria-usuario.dto';
 import { ListaUsuarioDTO } from './dto/lista-usuario.dto';
 import { AtualizaUsuarioDTO } from './dto/atualiza-usuario.dto';
-import { UsuarioRepository } from './usuario.repository';
 import { UsuarioExists } from './validacoes/usuario-exists.validator';
+import { UsuarioEntity } from './usuario.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Controller('/usuarios')
 export class UsuarioController {
-  constructor(private readonly usuarioRepository: UsuarioRepository) {}
+  constructor(
+    @InjectRepository(UsuarioEntity)
+    private readonly usuarioRepository: Repository<UsuarioEntity>,
+  ) {}
 
   @Get()
-  listaTodos(): ListaUsuarioDTO[] {
-    return this.usuarioRepository.listaTodos().map((usuario) => {
-      const listaUsuario = new ListaUsuarioDTO();
-      listaUsuario.dataCriacao = usuario.dataCriacao;
-      listaUsuario.email = usuario.email;
-      listaUsuario.id = usuario.id;
-      listaUsuario.dataAtualizacao = usuario.dataAtualizacao;
-      return listaUsuario;
+  async listaTodos(): Promise<ListaUsuarioDTO[]> {
+    const usuarios = await this.usuarioRepository.find();
+    return usuarios.map((usuario) => {
+      return new ListaUsuarioDTO(
+        usuario.id,
+        usuario.email,
+        usuario.dataCriacao,
+      );
     });
   }
 
   @Post()
-  criaUsuario(@Body() dadosUsuario: CriaUsuarioDTO) {
-    const usuarioCriado = this.usuarioRepository.salva(dadosUsuario);
-    return usuarioCriado;
+  async criaUsuario(@Body() dadosUsuario: CriaUsuarioDTO) {
+    const novoUsuario = dadosUsuario.toEntity();
+    const usuarioCriado = await this.usuarioRepository.save(novoUsuario);
+    return new ListaUsuarioDTO(
+      usuarioCriado.id,
+      usuarioCriado.email,
+      usuarioCriado.dataCriacao,
+    );
   }
 
   @Put('/:id')
-  editaUsuario(
+  async editaUsuario(
     @Param('id', UsuarioExists) id,
     @Body() dadosUsuario: AtualizaUsuarioDTO,
   ) {
-    const usuarioAtualizado = this.usuarioRepository.atualiza(id, dadosUsuario);
-    const listaUsuario = new ListaUsuarioDTO();
-    listaUsuario.dataCriacao = usuarioAtualizado.dataCriacao;
-    listaUsuario.email = usuarioAtualizado.email;
-    listaUsuario.id = usuarioAtualizado.id;
-    listaUsuario.dataAtualizacao = usuarioAtualizado.dataAtualizacao;
-    return listaUsuario;
+    const usuarioParaAtualizar = dadosUsuario.toEntity();
+    await this.usuarioRepository.update({ id: id }, usuarioParaAtualizar);
+    const usuarioAtualizado = await this.usuarioRepository.findOne({
+      where: { id },
+    });
+
+    return new ListaUsuarioDTO(
+      usuarioAtualizado.id,
+      usuarioAtualizado.email,
+      usuarioAtualizado.dataAtualizacao,
+    );
   }
 
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeUsuario(@Param('id', UsuarioExists) id: string) {
-    this.usuarioRepository.remove(id);
+  async removeUsuario(@Param('id', UsuarioExists) id: string) {
+    await this.usuarioRepository.delete({ id });
   }
 }

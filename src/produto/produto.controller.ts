@@ -9,44 +9,69 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 import { AtualizaProdutoDTO } from './dto/atualiza-produto.dto';
 import { CriaProdutoDTO } from './dto/cria-produto.dto';
-import { DeletaProdutoDTO } from './dto/deleta-produto.dto';
-import { ProdutoRepository } from './produto.repository';
+import { ProdutoCaracteristicaEntity } from './produto-caracteristica.entity';
+import { ProdutoImagemEntity } from './produto-imagem.entity';
+import { ProdutoEntity } from './produto.entity';
+
 import { ProdutoDoUsuario } from './validacoes/produto-do-usuario.validator';
 import { ProdutoExists } from './validacoes/produto-exists.validator';
 
 @Controller('produtos')
 export class ProdutoController {
-  constructor(private readonly produtoRepository: ProdutoRepository) {}
+  constructor(
+    @InjectRepository(ProdutoEntity)
+    private readonly produtoRepository: Repository<ProdutoEntity>,
+    @InjectRepository(ProdutoImagemEntity)
+    private readonly produtoImagensRepository: Repository<ProdutoImagemEntity>,
+    @InjectRepository(ProdutoCaracteristicaEntity)
+    private readonly produtoCaracteristicasRepository: Repository<ProdutoCaracteristicaEntity>,
+  ) {}
 
   @Get()
-  listaTodos() {
-    return this.produtoRepository.listaTodos();
+  async listaTodos() {
+    return this.produtoRepository.find({
+      relations: {
+        imagens: true,
+        caracteristicas: true,
+      },
+    });
   }
 
   @Post()
-  criaNovo(@Body() dadosProduto: CriaProdutoDTO) {
-    const produtoCadastrado = this.produtoRepository.salva(dadosProduto);
+  async criaNovo(@Body() dadosProduto: CriaProdutoDTO) {
+    const novoProduto = dadosProduto.toEntity();
+    const produtoCadastrado = await this.produtoRepository.save(novoProduto);
     return produtoCadastrado;
   }
 
   @Put('/:id')
-  atualiza(
+  async atualiza(
     @Param('id', ProdutoExists) id: string,
     @Body(ProdutoDoUsuario) dadosProduto: AtualizaProdutoDTO,
   ) {
-    const produtoAlterado = this.produtoRepository.atualiza(dadosProduto);
+    const produtoParaAtualizar = dadosProduto.toEntity();
+    await this.produtoRepository.save(produtoParaAtualizar);
+    const produtoAlterado = await this.produtoRepository.findOneBy({ id });
     return produtoAlterado;
   }
 
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
-    @Param('id', ProdutoExists) id: string,
-    @Body(ProdutoDoUsuario) dadosUsuario: DeletaProdutoDTO,
-  ) {
-    this.produtoRepository.remove(id);
+  async remove(@Param('id', ProdutoExists) id: string) {
+    const produto = await this.produtoRepository.findOne({
+      relations: {
+        imagens: true,
+        caracteristicas: true,
+      },
+      where: { id },
+    });
+    await this.produtoCaracteristicasRepository.remove(produto.caracteristicas);
+    await this.produtoImagensRepository.remove(produto.imagens);
+    await this.produtoRepository.remove(produto);
   }
 }

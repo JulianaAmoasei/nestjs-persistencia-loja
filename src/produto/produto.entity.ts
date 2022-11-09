@@ -6,6 +6,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ProdutoCaracteristicaEntity } from './produto-caracteristica.entity';
+import { ProdutoImagemEntity } from './produto-imagem.entity';
 
 @Entity('produtos')
 export class ProdutoEntity {
@@ -27,40 +29,14 @@ export class ProdutoEntity {
   @Column({ type: 'text' })
   descricao: string;
 
-  @OneToMany(() => CaracteristicaProduto, (cp) => cp.produto, { cascade: true })
-  caracteristicas: CaracteristicaProduto[];
+  @OneToMany(() => ProdutoCaracteristicaEntity, (cp) => cp.produto, {
+    cascade: true,
+  })
+  caracteristicas: ProdutoCaracteristicaEntity[];
 
-  @OneToMany(() => ImagemProduto, (ip) => ip.produto, { cascade: true })
-  imagens: ImagemProduto[];
+  @OneToMany(() => ProdutoImagemEntity, (ip) => ip.produto, { cascade: true })
+  imagens: ProdutoImagemEntity[];
 
   @Column()
   categoria: string;
-}
-
-@Entity('produtos_caracteristicas')
-export class CaracteristicaProduto {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @ManyToOne(() => ProdutoEntity)
-  produto: ProdutoEntity;
-
-  @Column()
-  nome: string;
-  @Column()
-  descricao: string;
-}
-
-@Entity('produtos_imagens')
-export class ImagemProduto {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @ManyToOne(() => ProdutoEntity)
-  produto: ProdutoEntity;
-
-  @Column()
-  url: string;
-  @Column()
-  descricao: string;
 }

@@ -10,6 +10,7 @@ const datasourceOptions: DataSourceOptions = {
   url: String(process.env.DATABASE_URL),
   entities: [entitiesGlob],
   migrations: [migrationsDir],
+  logging: true,
 };
 
 const datasource = new DataSource(datasourceOptions);

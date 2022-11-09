@@ -1,6 +1,7 @@
 export class ListaUsuarioDTO {
-  id: string;
-  email: string;
-  dataCriacao: Date;
-  dataAtualizacao: Date;
+  constructor(
+    readonly id: string,
+    readonly email: string,
+    readonly dataCriacao: Date,
+  ) {}
 }

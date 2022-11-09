@@ -4,15 +4,20 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common';
-import { UsuarioRepository } from '../usuario.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UsuarioEntity } from '../usuario.entity';
 
 @Injectable()
 export class UsuarioExists implements PipeTransform {
-  constructor(private readonly usuarioRepository: UsuarioRepository) {}
+  constructor(
+    @InjectRepository(UsuarioEntity)
+    private readonly usuarioRepository: Repository<UsuarioEntity>,
+  ) {}
 
-  transform(id: string) {
-    const usuario = this.usuarioRepository.buscaPorId(id);
-    if (!usuario) {
+  async transform(id: string) {
+    const usuarios = await this.usuarioRepository.findAndCountBy({ id });
+    if (!usuarios.length) {
       throw new BadRequestException({
         status: HttpStatus.NOT_FOUND,
         error: 'Not Found',
