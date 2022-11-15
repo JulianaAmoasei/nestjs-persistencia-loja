@@ -12,13 +12,13 @@ import { UsuarioService } from '../../usuario/usuario.service';
 import { AtualizaProdutoDTO } from '../dto/atualiza-produto.dto';
 import { DeletaProdutoDTO } from '../dto/deleta-produto.dto';
 import { ProdutoEntity } from '../produto.entity';
+import { ProdutoService } from '../produto.service';
 
 @Injectable()
 export class ProdutoDoUsuario implements PipeTransform {
   constructor(
     private readonly usuarioService: UsuarioService,
-    @InjectRepository(ProdutoEntity)
-    private readonly produtoRepository: Repository<ProdutoEntity>,
+    private readonly produtoService: ProdutoService,
   ) {}
 
   async transform(dadosProduto: AtualizaProdutoDTO | DeletaProdutoDTO) {
@@ -34,14 +34,9 @@ export class ProdutoDoUsuario implements PipeTransform {
       });
     }
 
-    const possivelProduto = await this.produtoRepository.findOne({
-      relations: {
-        usuario: true,
-        imagens: true,
-        caracteristicas: true,
-      },
-      where: { id: dadosProduto.id },
-    });
+    const possivelProduto = await this.produtoService.buscaComId(
+      dadosProduto.id,
+    );
 
     if (possivelProduto.usuario.id !== dadosProduto.usuarioId) {
       throw new ForbiddenException({

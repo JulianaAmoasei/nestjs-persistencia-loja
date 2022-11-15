@@ -10,8 +10,6 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { UsuarioEntity } from 'src/usuario/usuario.entity';
-import { ProdutoEntity } from '../produto.entity';
 import { CaracteristicaProdutoDTO, ImagemProdutoDTO } from './cria-produto.dto';
 
 export class AtualizaProdutoDTO {
@@ -59,30 +57,4 @@ export class AtualizaProdutoDTO {
   @IsNotEmpty({ message: 'Categoria do produto não pode ser vazia' })
   @IsOptional()
   categoria: string;
-
-  toEntity(): ProdutoEntity {
-    const usuario = new UsuarioEntity();
-    usuario.id = this.usuarioId;
-
-    const produto = new ProdutoEntity();
-    produto.nome = this.nome;
-    produto.descricao = this.descricao;
-    produto.categoria = this.categoria;
-    produto.quantidade = this.quantidade;
-    produto.valor = this.valor;
-    produto.usuario = usuario;
-    produto.imagens = this.imagens.map((imagem) => {
-      const produtoImagem = imagem.toEntity();
-      produtoImagem.produto = produto;
-      return produtoImagem;
-    });
-
-    produto.caracteristicas = this.caracteristicas.map((caracteristica) => {
-      const produtoCaracteristica = caracteristica.toEntity();
-      produtoCaracteristica.produto = produto;
-      return produtoCaracteristica;
-    });
-
-    return produto;
-  }
 }

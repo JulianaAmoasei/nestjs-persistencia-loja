@@ -31,10 +31,14 @@ export class ProdutoEntity {
 
   @OneToMany(() => ProdutoCaracteristicaEntity, (cp) => cp.produto, {
     cascade: true,
+    onDelete: 'CASCADE',
   })
   caracteristicas: ProdutoCaracteristicaEntity[];
 
-  @OneToMany(() => ProdutoImagemEntity, (ip) => ip.produto, { cascade: true })
+  @OneToMany(() => ProdutoImagemEntity, (ip) => ip.produto, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   imagens: ProdutoImagemEntity[];
 
   @Column()

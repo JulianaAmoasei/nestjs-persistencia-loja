@@ -1,5 +1,4 @@
 import { IsUUID } from 'class-validator';
-
 export class DeletaProdutoDTO {
   @IsUUID()
   usuarioId: string;

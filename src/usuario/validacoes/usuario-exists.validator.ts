@@ -1,24 +1,19 @@
 import {
-  BadRequestException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   PipeTransform,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UsuarioEntity } from '../usuario.entity';
+import { UsuarioService } from '../usuario.service';
 
 @Injectable()
 export class UsuarioExists implements PipeTransform {
-  constructor(
-    @InjectRepository(UsuarioEntity)
-    private readonly usuarioRepository: Repository<UsuarioEntity>,
-  ) {}
+  constructor(private readonly usuarioService: UsuarioService) {}
 
   async transform(id: string) {
-    const usuarios = await this.usuarioRepository.findAndCountBy({ id });
-    if (!usuarios.length) {
-      throw new BadRequestException({
+    const usuarioExiste = await this.usuarioService.existeComId(id);
+    if (!usuarioExiste) {
+      throw new NotFoundException({
         status: HttpStatus.NOT_FOUND,
         error: 'Not Found',
         message: ['Usuário não existe'],

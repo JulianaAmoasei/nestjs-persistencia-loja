@@ -11,10 +11,6 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { UsuarioEntity } from 'src/usuario/usuario.entity';
-import { ProdutoCaracteristicaEntity } from '../produto-caracteristica.entity';
-import { ProdutoImagemEntity } from '../produto-imagem.entity';
-import { ProdutoEntity } from '../produto.entity';
 
 export class CaracteristicaProdutoDTO {
   @IsString()
@@ -24,13 +20,6 @@ export class CaracteristicaProdutoDTO {
   @IsString()
   @IsNotEmpty({ message: 'Descrição da característica não pode ser vazio' })
   descricao: string;
-
-  toEntity(): ProdutoCaracteristicaEntity {
-    const produtoCaracteristica = new ProdutoCaracteristicaEntity();
-    produtoCaracteristica.nome = this.nome;
-    produtoCaracteristica.descricao = this.descricao;
-    return produtoCaracteristica;
-  }
 }
 
 export class ImagemProdutoDTO {
@@ -40,14 +29,6 @@ export class ImagemProdutoDTO {
   @IsString()
   @IsNotEmpty({ message: 'Descrição da imagem não pode ser vazia' })
   descricao: string;
-
-  toEntity(): ProdutoImagemEntity {
-    const produtoImagem = new ProdutoImagemEntity();
-    produtoImagem.url = this.url;
-    produtoImagem.descricao = this.descricao;
-
-    return produtoImagem;
-  }
 }
 
 export class CriaProdutoDTO {
@@ -88,24 +69,4 @@ export class CriaProdutoDTO {
   @IsString()
   @IsNotEmpty({ message: 'Categoria do produto não pode ser vazia' })
   categoria: string;
-
-  toEntity(): ProdutoEntity {
-    const usuario = new UsuarioEntity();
-    usuario.id = this.usuarioId;
-
-    const produto = new ProdutoEntity();
-    produto.nome = this.nome;
-    produto.descricao = this.descricao;
-    produto.categoria = this.categoria;
-    produto.quantidade = this.quantidade;
-    produto.valor = this.valor;
-    produto.usuario = usuario;
-    produto.imagens = this.imagens.map((imagem) => imagem.toEntity());
-
-    produto.caracteristicas = this.caracteristicas.map((caracteristica) =>
-      caracteristica.toEntity(),
-    );
-
-    return produto;
-  }
 }

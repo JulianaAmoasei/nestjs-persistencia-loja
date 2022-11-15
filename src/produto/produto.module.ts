@@ -5,6 +5,7 @@ import { ProdutoCaracteristicaEntity } from './produto-caracteristica.entity';
 import { ProdutoImagemEntity } from './produto-imagem.entity';
 import { ProdutoController } from './produto.controller';
 import { ProdutoEntity } from './produto.entity';
+import { ProdutoService } from './produto.service';
 import { ProdutoDoUsuario } from './validacoes/produto-do-usuario.validator';
 import { ProdutoExists } from './validacoes/produto-exists.validator';
 
@@ -18,6 +19,6 @@ import { ProdutoExists } from './validacoes/produto-exists.validator';
     ]),
   ],
   controllers: [ProdutoController],
-  providers: [ProdutoDoUsuario, ProdutoExists],
+  providers: [ProdutoDoUsuario, ProdutoExists, ProdutoService],
 })
 export class ProdutoModule {}
